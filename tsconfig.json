@@ -22,6 +22,14 @@
       "@/*": ["./*"]
     }
   },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node",
+    "moduleTypes": {
+      "scripts/**/*": "esm"
+    },
+    "transpileOnly": true
+  },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }
