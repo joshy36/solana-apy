@@ -3,7 +3,7 @@ import { RefreshCw } from 'lucide-react';
 import { usePoolStats } from '../hooks/usePoolStats';
 
 export default function PoolStats() {
-  const { data, isLoading, refetch } = usePoolStats({
+  const { data, isLoading, isFetching, refetch } = usePoolStats({
     tokenAddress: 'NUMERUNsFCP3kuNmWZuXtm1AaQCPj9uw6Guv2Ekoi5P',
   });
 
@@ -26,11 +26,13 @@ export default function PoolStats() {
           </h2>
           <button
             onClick={() => refetch()}
-            disabled={isLoading}
+            disabled={isLoading || isFetching}
             className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 text-gray-600 shadow h-9 w-9 rounded-xl bg-white hover:bg-gray-50"
           >
             <RefreshCw
-              className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+              className={`h-4 w-4 ${
+                isFetching && !isLoading ? 'animate-spin' : ''
+              }`}
             />
           </button>
         </div>
@@ -40,7 +42,7 @@ export default function PoolStats() {
             <div key={token} className="rounded-xl bg-white border p-4">
               <div className="text-sm text-gray-600">{token}</div>
               <div className="mt-1 flex items-center gap-3">
-                {isLoading ? (
+                {isLoading || isFetching ? (
                   <div className="animate-pulse bg-gray-200 h-8 w-32 rounded-xl"></div>
                 ) : (
                   <>
@@ -70,7 +72,7 @@ export default function PoolStats() {
             <div className="rounded-xl bg-white border p-4">
               <div className="text-sm text-gray-600">TVL</div>
               <div className="mt-1">
-                {isLoading ? (
+                {isLoading || isFetching ? (
                   <div className="animate-pulse bg-gray-200 h-8 w-32 rounded-xl"></div>
                 ) : (
                   <div className="text-2xl">${tvl?.toLocaleString()}</div>
@@ -81,7 +83,7 @@ export default function PoolStats() {
             <div className="mt-4 rounded-xl bg-white border p-4">
               <div className="text-sm text-gray-600">24h Volume</div>
               <div className="mt-1">
-                {isLoading ? (
+                {isLoading || isFetching ? (
                   <div className="animate-pulse bg-gray-200 h-8 w-32 rounded-xl"></div>
                 ) : (
                   <div className="text-2xl">
@@ -94,7 +96,7 @@ export default function PoolStats() {
             <div className="mt-4 rounded-xl bg-white border p-4">
               <div className="text-sm text-gray-600">Volume/TVL</div>
               <div className="mt-1">
-                {isLoading ? (
+                {isLoading || isFetching ? (
                   <div className="animate-pulse bg-gray-200 h-8 w-32 rounded-xl"></div>
                 ) : (
                   <div className="text-2xl">
@@ -107,7 +109,7 @@ export default function PoolStats() {
             <div className="mt-4 rounded-xl bg-white border p-4">
               <div className="text-sm text-gray-600">APR</div>
               <div className="mt-1">
-                {isLoading ? (
+                {isLoading || isFetching ? (
                   <div className="animate-pulse bg-gray-200 h-8 w-32 rounded-xl"></div>
                 ) : (
                   <div className="text-2xl">{apr ? `${apr}%` : '–'}</div>
