@@ -73,7 +73,8 @@ export async function GET() {
         balances: susdBalances,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    console.error('APR calculation failed:', error);
     return NextResponse.json(
       { error: 'Failed to calculate APR' },
       { status: 500 }

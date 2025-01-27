@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PoolStats } from '../hooks/usePoolStats';
 import { Slider } from '@/components/ui/slider';
+import Image from 'next/image';
 
 export type PoolCardProps = {
   title: string;
@@ -18,7 +19,6 @@ export function PoolCard({
   stats,
   seedPoolApr,
   isLoading,
-  isFetching,
   slider,
 }: PoolCardProps) {
   const [value, setValue] = useState<number[]>([50]);
@@ -31,10 +31,6 @@ export function PoolCard({
   const displaySymbol = (symbol: string) => {
     return symbol === 'USDstar' ? 'USD*' : symbol;
   };
-
-  const LoadingSkeleton = () => (
-    <div className="h-8 bg-gray-100 rounded animate-pulse" />
-  );
 
   const ValueSkeleton = () => (
     <div className="h-8 w-32 bg-gray-100 rounded animate-pulse" />
@@ -54,7 +50,7 @@ export function PoolCard({
         {tokens.map(({ symbol, logo }) => (
           <div key={symbol} className="p-2">
             <div className="text-sm text-gray-600 flex items-center gap-2">
-              <img src={logo} alt={`${symbol} logo`} className="w-5 h-5" />
+              <Image src={logo} alt={`${symbol} logo`} className="w-5 h-5" />
               {displaySymbol(symbol)}
             </div>
             <div className="mt-1 flex items-center gap-3 min-h-[32px]">
