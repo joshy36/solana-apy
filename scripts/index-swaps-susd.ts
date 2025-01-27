@@ -67,7 +67,7 @@ async function storeTransaction(
     const transactionDate = convertBlockTimeToDateTime(tx.blockTime);
 
     const { data: transaction, error } = await supabase
-      .from('transactions')
+      .from('susd_transactions')
       .insert({
         signature: tx.transaction.signatures[0],
         block_time: tx.blockTime,
@@ -94,7 +94,7 @@ async function storeSwap(
   amountOut: number
 ) {
   try {
-    const { error } = await supabase.from('swaps').insert({
+    const { error } = await supabase.from('susd_swaps').insert({
       transaction_id: transactionId,
       amount_in: amountIn,
       amount_out: amountOut,
@@ -239,7 +239,7 @@ async function processTransactions(
 }
 
 async function main() {
-  const poolAddress = 'NUMERUNsFCP3kuNmWZuXtm1AaQCPj9uw6Guv2Ekoi5P';
+  const poolAddress = '4FxWowiGfd8oseveAdXYafzc3fczKda9zi65oj6jqbtL';
   const connection = new Connection(process.env.NEXT_PUBLIC_QUICKNODE_RPC_URL!);
 
   await processTransactions(connection, poolAddress);

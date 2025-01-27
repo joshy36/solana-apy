@@ -1,26 +1,27 @@
 import { useQuery } from '@tanstack/react-query';
 
-interface PoolAprResponse {
+export interface PoolStats {
   apr: number;
   volume24h: number;
-  balances: {
-    USDC: number;
-    USDT: number;
-    PYUSD: number;
-  };
   tvl: number;
+  balances: Record<string, number>;
 }
 
-export function usePoolStats({ tokenAddress }: { tokenAddress: string }) {
-  return useQuery<PoolAprResponse>({
-    queryKey: ['pool-apr', tokenAddress],
+export interface PoolStatsResponse {
+  mainPool: PoolStats;
+  susdPool: PoolStats;
+}
+
+export function usePoolStats() {
+  return useQuery<PoolStatsResponse>({
+    queryKey: ['pool-stats'],
     queryFn: async () => {
-      const response = await fetch(`/api/get-pool-apr?pool=seed`);
+      const response = await fetch(`/api/get-pool-apr`);
       if (!response.ok) {
         throw new Error('Failed to fetch APR');
       }
-
-      return response.json();
+      const data = await response.json();
+      return data;
     },
   });
 }

@@ -9,25 +9,81 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      swaps: {
+      susd_swaps: {
         Row: {
           amount_in: number
           amount_out: number
-          created_at: string | null
           id: string
           transaction_id: string | null
         }
         Insert: {
           amount_in: number
           amount_out: number
-          created_at?: string | null
           id?: string
           transaction_id?: string | null
         }
         Update: {
           amount_in?: number
           amount_out?: number
-          created_at?: string | null
+          id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "susd_swaps_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "susd_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      susd_transactions: {
+        Row: {
+          block_time: number
+          date: string | null
+          fee: number
+          id: string
+          operation: string
+          signature: string
+          slot: number
+        }
+        Insert: {
+          block_time: number
+          date?: string | null
+          fee: number
+          id?: string
+          operation: string
+          signature: string
+          slot: number
+        }
+        Update: {
+          block_time?: number
+          date?: string | null
+          fee?: number
+          id?: string
+          operation?: string
+          signature?: string
+          slot?: number
+        }
+        Relationships: []
+      }
+      swaps: {
+        Row: {
+          amount_in: number
+          amount_out: number
+          id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          amount_in: number
+          amount_out: number
+          id?: string
+          transaction_id?: string | null
+        }
+        Update: {
+          amount_in?: number
+          amount_out?: number
           id?: string
           transaction_id?: string | null
         }
@@ -44,7 +100,6 @@ export type Database = {
       transactions: {
         Row: {
           block_time: number
-          created_at: string | null
           date: string | null
           fee: number
           id: string
@@ -54,7 +109,6 @@ export type Database = {
         }
         Insert: {
           block_time: number
-          created_at?: string | null
           date?: string | null
           fee: number
           id?: string
@@ -64,7 +118,6 @@ export type Database = {
         }
         Update: {
           block_time?: number
-          created_at?: string | null
           date?: string | null
           fee?: number
           id?: string
