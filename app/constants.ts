@@ -23,3 +23,22 @@ export const TOKEN_ACCOUNT_SUSD_USDSTAR_POOL_1 = new PublicKey(
 export const TOKEN_ACCOUNT_SUSD_USDSTAR_POOL_2 = new PublicKey(
   'DEBv7pwV5npRsVL2JWtDUGG9vx9H1sPRRNzebkquKnMo'
 );
+
+export const TOKEN_ACCOUNT_USDS_USDSTAR_POOL_1 = new PublicKey(
+  '3DFmntWjh9PrzsiFnPQeMW773A9m62uVPE6j9YK32QCa'
+);
+export const TOKEN_ACCOUNT_USDS_USDSTAR_POOL_2 = new PublicKey(
+  'DjM7X2i6F8b8U6MReCusyARv5LGQtyyWiJ77q5Y6EWrL'
+);
+export const TOKEN_ACCOUNT_USDY_USDSTAR_POOL_1 = new PublicKey(
+  'DqNRPbFHeDwM3JAXJmSutPRJNimaz4pdHjKo6vGx6jfg'
+);
+export const TOKEN_ACCOUNT_USDY_USDSTAR_POOL_2 = new PublicKey(
+  'F8yCmUsHA2iSxsfkqCVdvPgy84pK3EG9SpwZAVkitgfY'
+);
+export const TOKEN_ACCOUNT_CFUSD_USDSTAR_POOL_1 = new PublicKey(
+  'FuSNPqppBECY7vvyFFdDxAkxL67zgoujYEQSpKejfHa2'
+);
+export const TOKEN_ACCOUNT_CFUSD_USDSTAR_POOL_2 = new PublicKey(
+  'BLnmPcexuRAcFbTPBJvqCpL6vypojfRvyrC81shxgAF9'
+);

@@ -1,12 +1,28 @@
 import { NextResponse } from 'next/server';
-import {
-  TOKEN_ACCOUNT_PYUSD,
-  TOKEN_ACCOUNT_USDC,
-  TOKEN_ACCOUNT_USDT,
-  TOKEN_ACCOUNT_SUSD_USDSTAR_POOL_1,
-  TOKEN_ACCOUNT_SUSD_USDSTAR_POOL_2,
-} from '../../constants';
+import { PublicKey } from '@solana/web3.js';
 import { connection, supabase } from '@/lib/clients';
+import {
+  POOLS,
+  FEE_PERCENTAGE,
+  DAYS_IN_YEAR,
+  PoolData,
+} from '../../types/backend';
+
+async function getPoolBalances(tokenAccounts: PublicKey[]): Promise<number[]> {
+  const balances = await Promise.all(
+    tokenAccounts.map((account) => connection.getTokenAccountBalance(account))
+  );
+  return balances.map((balance) => balance.value.uiAmount || 0);
+}
+
+function calculateTVL(balances: number[]): number {
+  return balances.reduce((sum, balance) => sum + balance, 0);
+}
+
+function calculateAPR(volume: number, tvl: number): string {
+  const apr = ((volume * FEE_PERCENTAGE * DAYS_IN_YEAR) / tvl) * 100;
+  return apr.toFixed(2);
+}
 
 export async function GET() {
   try {
@@ -14,59 +30,33 @@ export async function GET() {
       .from('volumes')
       .select('*')
       .order('calculated_at', { ascending: false })
-      .limit(2);
+      .limit(5);
 
     if (volumesError) throw volumesError;
 
-    const mainVolume = volumes.find((v) => v.pool_type === 'main')?.volume || 0;
-    const susdVolume = volumes.find((v) => v.pool_type === 'susd')?.volume || 0;
+    const poolsData: Record<string, PoolData> = {};
 
-    const tokenBalances = await Promise.all([
-      connection.getTokenAccountBalance(TOKEN_ACCOUNT_USDC),
-      connection.getTokenAccountBalance(TOKEN_ACCOUNT_USDT),
-      connection.getTokenAccountBalance(TOKEN_ACCOUNT_PYUSD),
-      connection.getTokenAccountBalance(TOKEN_ACCOUNT_SUSD_USDSTAR_POOL_1),
-      connection.getTokenAccountBalance(TOKEN_ACCOUNT_SUSD_USDSTAR_POOL_2),
-    ]);
+    for (const [poolKey, poolConfig] of Object.entries(POOLS)) {
+      const volume =
+        volumes.find((v) => v.pool_type === poolConfig.type)?.volume || 0;
+      const balanceValues = await getPoolBalances(poolConfig.tokenAccounts);
 
-    const balances = {
-      USDC: tokenBalances[0].value.uiAmount || 0,
-      USDT: tokenBalances[1].value.uiAmount || 0,
-      PYUSD: tokenBalances[2].value.uiAmount || 0,
-    };
+      const balances = Object.fromEntries(
+        poolConfig.tokenNames.map((name, index) => [name, balanceValues[index]])
+      );
 
-    const susdBalances = {
-      sUSD: tokenBalances[3].value.uiAmount || 0,
-      USDstar: tokenBalances[4].value.uiAmount || 0,
-    };
+      const tvl = calculateTVL(balanceValues);
+      const apr = calculateAPR(volume, tvl);
 
-    const poolTVL = Object.values(balances).reduce(
-      (sum, balance) => sum + balance,
-      0
-    );
-    const susdPoolTVL = Object.values(susdBalances).reduce(
-      (sum, balance) => sum + balance,
-      0
-    );
-
-    const feePercentage = 0.0001;
-    const apr = ((mainVolume * feePercentage * 365) / poolTVL) * 100;
-    const susdApr = ((susdVolume * feePercentage * 365) / susdPoolTVL) * 100;
-
-    return NextResponse.json({
-      mainPool: {
-        apr: apr.toFixed(2),
-        volume24h: mainVolume,
-        tvl: poolTVL,
+      poolsData[`${poolKey}Pool`] = {
+        apr,
+        volume24h: volume,
+        tvl,
         balances,
-      },
-      susdPool: {
-        apr: susdApr.toFixed(2),
-        volume24h: susdVolume,
-        tvl: susdPoolTVL,
-        balances: susdBalances,
-      },
-    });
+      };
+    }
+
+    return NextResponse.json(poolsData);
   } catch (error: unknown) {
     console.error('APR calculation failed:', error);
     return NextResponse.json(

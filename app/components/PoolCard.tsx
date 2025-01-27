@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PoolStats } from '../hooks/usePoolStats';
 import { Slider } from '@/components/ui/slider';
 import Image from 'next/image';
+import { Banknote, BarChart, DollarSign, Scale } from 'lucide-react';
 
 export type PoolCardProps = {
   title: string;
@@ -10,7 +11,6 @@ export type PoolCardProps = {
   seedPoolApr: number | undefined;
   isLoading: boolean;
   isFetching: boolean;
-  slider: boolean;
 };
 
 export function PoolCard({
@@ -19,7 +19,6 @@ export function PoolCard({
   stats,
   seedPoolApr,
   isLoading,
-  slider,
 }: PoolCardProps) {
   const [value, setValue] = useState<number[]>([50]);
 
@@ -60,7 +59,7 @@ export function PoolCard({
               {displaySymbol(symbol)}
             </div>
             <div className="mt-1 flex items-center gap-3 min-h-[32px]">
-              <div className="text-xl min-w-[128px]">
+              <div className="text-lg min-w-[128px]">
                 {isLoading ? (
                   <ValueSkeleton />
                 ) : !stats?.balances[symbol] ? (
@@ -82,9 +81,12 @@ export function PoolCard({
         <div className="border-t pt-4 mt-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="p-2">
-              <div className="text-sm text-gray-600">TVL</div>
+              <div className="text-sm text-gray-600 flex items-center gap-2">
+                <Banknote className="w-4 h-4" />
+                TVL
+              </div>
               <div className="mt-1">
-                <div className="text-xl">
+                <div className="text-lg">
                   {isLoading ? (
                     <ValueSkeleton />
                   ) : stats?.tvl ? (
@@ -97,9 +99,12 @@ export function PoolCard({
             </div>
 
             <div className="p-2">
-              <div className="text-sm text-gray-600">24h Volume</div>
+              <div className="text-sm text-gray-600 flex items-center gap-2">
+                <BarChart className="w-4 h-4" />
+                24h Volume
+              </div>
               <div className="mt-1">
-                <div className="text-xl">
+                <div className="text-lg">
                   {isLoading ? (
                     <ValueSkeleton />
                   ) : stats?.volume24h ? (
@@ -112,9 +117,12 @@ export function PoolCard({
             </div>
 
             <div className="p-2">
-              <div className="text-sm text-gray-600">Volume/TVL</div>
+              <div className="text-sm text-gray-600 flex items-center gap-2">
+                <Scale className="w-4 h-4" />
+                Volume/TVL
+              </div>
               <div className="mt-1">
-                <div className="text-xl">
+                <div className="text-lg">
                   {isLoading ? (
                     <ValueSkeleton />
                   ) : stats?.volume24h && stats?.tvl ? (
@@ -125,31 +133,27 @@ export function PoolCard({
                 </div>
               </div>
             </div>
-
             <div className="p-2">
-              <div className="text-sm text-gray-600">APR</div>
+              <div className="text-sm text-gray-600 flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
+                APR
+              </div>
               <div className="mt-1">
-                <div className="text-xl">
+                <div className="text-lg">
                   {isLoading ? (
                     <ValueSkeleton />
-                  ) : slider ? (
-                    seedPoolApr ? (
-                      `${(
-                        (Number(seedPoolApr) * value[0]) / 100 +
-                        Number(stats?.apr ?? 0)
-                      ).toFixed(2)}%`
-                    ) : (
-                      '–'
-                    )
                   ) : seedPoolApr ? (
-                    `${seedPoolApr}%`
+                    `${(
+                      (Number(seedPoolApr) * value[0]) / 100 +
+                      Number(stats?.apr ?? 0)
+                    ).toFixed(2)}%`
                   ) : (
                     '–'
                   )}
                 </div>
               </div>
             </div>
-            {slider && (
+            {
               <div className="col-span-2 py-6 px-4">
                 <div className="mb-2 text-sm text-gray-600 flex justify-between">
                   <span>USD* LP Share</span>
@@ -162,14 +166,14 @@ export function PoolCard({
                   onValueChange={(value) => setValue(value)}
                 />
                 <div className="text-center mt-2 text-sm text-gray-600">
-                  <span className="font-mono">
+                  <span className="font-mono text-xs">
                     Base APR: {isLoading ? '–' : stats?.apr ?? 0}% + (Seed APR:{' '}
                     {isLoading ? '–' : seedPoolApr ?? 0}% ×{' '}
                     {(value[0] / 100).toFixed(2)})
                   </span>
                 </div>
               </div>
-            )}
+            }
           </div>
         </div>
       </div>

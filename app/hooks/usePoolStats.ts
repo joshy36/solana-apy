@@ -10,6 +10,9 @@ export interface PoolStats {
 export interface PoolStatsResponse {
   mainPool: PoolStats;
   susdPool: PoolStats;
+  usdsPool: PoolStats;
+  usdyPool: PoolStats;
+  cfusdPool: PoolStats;
 }
 
 export function usePoolStats() {
