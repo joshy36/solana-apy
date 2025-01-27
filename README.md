@@ -14,7 +14,13 @@ pnpm dev
 bun dev
 ```
 
+## Generate Types
+
 `supabase gen types typescript --project-id dicobstovuazzxpvbpbi --schema public > types/database.types.ts`
+
+## Index Swaps
+
+`npm run script scripts/index-swaps.ts <poolAddress> <poolName>`
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

@@ -50,7 +50,13 @@ export function PoolCard({
         {tokens.map(({ symbol, logo }) => (
           <div key={symbol} className="p-2">
             <div className="text-sm text-gray-600 flex items-center gap-2">
-              <Image src={logo} alt={`${symbol} logo`} className="w-5 h-5" />
+              <Image
+                src={logo}
+                alt={`${symbol} logo`}
+                width={20}
+                height={20}
+                className="w-5 h-5"
+              />
               {displaySymbol(symbol)}
             </div>
             <div className="mt-1 flex items-center gap-3 min-h-[32px]">
@@ -146,7 +152,7 @@ export function PoolCard({
             {slider && (
               <div className="col-span-2 py-6 px-4">
                 <div className="mb-2 text-sm text-gray-600 flex justify-between">
-                  <span>sUSD LP Share</span>
+                  <span>USD* LP Share</span>
                   <span>{value[0]}%</span>
                 </div>
                 <Slider

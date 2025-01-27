@@ -7,6 +7,27 @@ import { createClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database.types';
 import { promisify } from 'util';
 
+// Get command line arguments
+const args = process.argv.slice(2);
+if (args.length < 2) {
+  console.error(
+    'Usage: npm run script scripts/index-swaps.ts <poolAddress> <poolName> [targetSignatures]'
+  );
+  process.exit(1);
+}
+
+const poolAddress = args[0];
+const poolName = args[1];
+const targetSignatures = args[2] ? parseInt(args[2]) : 10000;
+
+// Validate pool address
+try {
+  new PublicKey(poolAddress);
+} catch (error) {
+  console.error('Invalid pool address');
+  process.exit(1);
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -49,8 +70,22 @@ async function decodeSwapData(programData: string) {
     const amount1 = buffer.readBigUInt64LE(8);
     const amount2 = buffer.readBigUInt64LE(16);
 
-    const usdAmount1 = convertToUSD(amount1);
-    const usdAmount2 = convertToUSD(amount2);
+    // Do base conversion first
+    let usdAmount1 = Math.round(Number(amount1) / 10000) / 100;
+    let usdAmount2 = Math.round(Number(amount2) / 10000) / 100;
+
+    // Check if either amount is ~1000x the other
+    const ratio =
+      Math.max(usdAmount1, usdAmount2) / Math.min(usdAmount1, usdAmount2);
+    if (ratio > 900 && ratio < 1100) {
+      // Using a range around 1000 to account for price impact
+      // Divide the larger number by 1000
+      if (usdAmount1 > usdAmount2) {
+        usdAmount1 = usdAmount1 / 1000;
+      } else {
+        usdAmount2 = usdAmount2 / 1000;
+      }
+    }
 
     return { usdAmount1, usdAmount2 };
   } catch (error) {
@@ -61,13 +96,16 @@ async function decodeSwapData(programData: string) {
 
 async function storeTransaction(
   tx: any,
-  operation: string
+  operation: string,
+  poolName: string
 ): Promise<string | null> {
   try {
     const transactionDate = convertBlockTimeToDateTime(tx.blockTime);
+    const tableName = `${poolName}_transactions`;
 
     const { data: transaction, error } = await supabase
-      .from('susd_transactions')
+      //@ts-ignore
+      .from(tableName)
       .insert({
         signature: tx.transaction.signatures[0],
         block_time: tx.blockTime,
@@ -91,10 +129,13 @@ async function storeTransaction(
 async function storeSwap(
   transactionId: string,
   amountIn: number,
-  amountOut: number
+  amountOut: number,
+  poolName: string
 ) {
   try {
-    const { error } = await supabase.from('susd_swaps').insert({
+    const tableName = `${poolName}_swaps`;
+    //@ts-ignore
+    const { error } = await supabase.from(tableName).insert({
       transaction_id: transactionId,
       amount_in: amountIn,
       amount_out: amountOut,
@@ -128,9 +169,12 @@ async function getSignaturesBatch(
 async function processTransactions(
   connection: Connection,
   poolAddress: string,
-  targetSignatures: number = 30000
+  poolName: string,
+  targetSignatures: number = 10000
 ): Promise<number> {
   console.log(`Fetching transactions for pool: ${poolAddress}`);
+  console.log(`Pool name: ${poolName}`);
+  console.log(`Target signatures: ${targetSignatures}`);
 
   const address = new PublicKey(poolAddress);
   let dailyVolume = 0;
@@ -200,12 +244,17 @@ async function processTransactions(
             console.log(`- Amount In: $${amounts.usdAmount1.toFixed(2)}`);
             console.log(`- Amount Out: $${amounts.usdAmount2.toFixed(2)}`);
 
-            const transactionId = await storeTransaction(tx, operationType);
+            const transactionId = await storeTransaction(
+              tx,
+              operationType,
+              poolName
+            );
             if (transactionId) {
               await storeSwap(
                 transactionId,
                 amounts.usdAmount1,
-                amounts.usdAmount2
+                amounts.usdAmount2,
+                poolName
               );
             }
 
@@ -222,7 +271,7 @@ async function processTransactions(
               5
             )} | Operation: ${operationType}`
           );
-          await storeTransaction(tx, operationType);
+          await storeTransaction(tx, operationType, poolName);
         }
       }
 
@@ -238,11 +287,18 @@ async function processTransactions(
   }
 }
 
+// Main execution
 async function main() {
-  const poolAddress = '4FxWowiGfd8oseveAdXYafzc3fczKda9zi65oj6jqbtL';
   const connection = new Connection(process.env.NEXT_PUBLIC_QUICKNODE_RPC_URL!);
-
-  await processTransactions(connection, poolAddress);
+  await processTransactions(
+    connection,
+    poolAddress,
+    poolName,
+    targetSignatures
+  );
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error('Script failed:', error);
+  process.exit(1);
+});

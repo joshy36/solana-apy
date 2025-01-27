@@ -9,6 +9,65 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      cfusd_swaps: {
+        Row: {
+          amount_in: number
+          amount_out: number
+          id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          amount_in: number
+          amount_out: number
+          id?: string
+          transaction_id?: string | null
+        }
+        Update: {
+          amount_in?: number
+          amount_out?: number
+          id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cfusd_swaps_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "cfusd_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cfusd_transactions: {
+        Row: {
+          block_time: number
+          date: string
+          fee: number
+          id: string
+          operation: string
+          signature: string
+          slot: number
+        }
+        Insert: {
+          block_time: number
+          date: string
+          fee: number
+          id?: string
+          operation: string
+          signature: string
+          slot: number
+        }
+        Update: {
+          block_time?: number
+          date?: string
+          fee?: number
+          id?: string
+          operation?: string
+          signature?: string
+          slot?: number
+        }
+        Relationships: []
+      }
       susd_swaps: {
         Row: {
           amount_in: number
@@ -124,6 +183,151 @@ export type Database = {
           operation?: string
           signature?: string
           slot?: number
+        }
+        Relationships: []
+      }
+      usds_swaps: {
+        Row: {
+          amount_in: number
+          amount_out: number
+          id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          amount_in: number
+          amount_out: number
+          id?: string
+          transaction_id?: string | null
+        }
+        Update: {
+          amount_in?: number
+          amount_out?: number
+          id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usds_swaps_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "usds_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usds_transactions: {
+        Row: {
+          block_time: number
+          date: string
+          fee: number
+          id: string
+          operation: string
+          signature: string
+          slot: number
+        }
+        Insert: {
+          block_time: number
+          date: string
+          fee: number
+          id?: string
+          operation: string
+          signature: string
+          slot: number
+        }
+        Update: {
+          block_time?: number
+          date?: string
+          fee?: number
+          id?: string
+          operation?: string
+          signature?: string
+          slot?: number
+        }
+        Relationships: []
+      }
+      usdy_swaps: {
+        Row: {
+          amount_in: number
+          amount_out: number
+          id: string
+          transaction_id: string | null
+        }
+        Insert: {
+          amount_in: number
+          amount_out: number
+          id?: string
+          transaction_id?: string | null
+        }
+        Update: {
+          amount_in?: number
+          amount_out?: number
+          id?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usdy_swaps_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "usdy_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usdy_transactions: {
+        Row: {
+          block_time: number
+          date: string
+          fee: number
+          id: string
+          operation: string
+          signature: string
+          slot: number
+        }
+        Insert: {
+          block_time: number
+          date: string
+          fee: number
+          id?: string
+          operation: string
+          signature: string
+          slot: number
+        }
+        Update: {
+          block_time?: number
+          date?: string
+          fee?: number
+          id?: string
+          operation?: string
+          signature?: string
+          slot?: number
+        }
+        Relationships: []
+      }
+      volumes: {
+        Row: {
+          calculated_at: string | null
+          end_date: string
+          id: string
+          pool_type: string
+          start_date: string
+          volume: number
+        }
+        Insert: {
+          calculated_at?: string | null
+          end_date: string
+          id?: string
+          pool_type: string
+          start_date: string
+          volume: number
+        }
+        Update: {
+          calculated_at?: string | null
+          end_date?: string
+          id?: string
+          pool_type?: string
+          start_date?: string
+          volume?: number
         }
         Relationships: []
       }

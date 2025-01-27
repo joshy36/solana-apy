@@ -10,6 +10,17 @@ import { connection, supabase } from '@/lib/clients';
 
 export async function GET() {
   try {
+    const { data: volumes, error: volumesError } = await supabase
+      .from('volumes')
+      .select('*')
+      .order('calculated_at', { ascending: false })
+      .limit(2);
+
+    if (volumesError) throw volumesError;
+
+    const mainVolume = volumes.find((v) => v.pool_type === 'main')?.volume || 0;
+    const susdVolume = volumes.find((v) => v.pool_type === 'susd')?.volume || 0;
+
     const tokenBalances = await Promise.all([
       connection.getTokenAccountBalance(TOKEN_ACCOUNT_USDC),
       connection.getTokenAccountBalance(TOKEN_ACCOUNT_USDT),
@@ -33,42 +44,25 @@ export async function GET() {
       (sum, balance) => sum + balance,
       0
     );
-
     const susdPoolTVL = Object.values(susdBalances).reduce(
       (sum, balance) => sum + balance,
       0
     );
 
-    const [swapsData, susdSwapsData] = await Promise.all([
-      supabase.from('swaps').select('total_volume:amount_in.sum()'),
-      supabase.from('susd_swaps').select('total_volume:amount_in.sum()'),
-    ]);
-
-    if (swapsData.error || susdSwapsData.error) {
-      return NextResponse.json(
-        { error: swapsData.error?.message || susdSwapsData.error?.message },
-        { status: 500 }
-      );
-    }
-
-    const totalVolume = swapsData.data?.[0]?.total_volume || 0;
-    const susdTotalVolume = susdSwapsData.data?.[0]?.total_volume || 0;
     const feePercentage = 0.0001;
-
-    const apr = ((totalVolume * feePercentage * 365) / poolTVL) * 100;
-    const susdApr =
-      ((susdTotalVolume * feePercentage * 365) / susdPoolTVL) * 100;
+    const apr = ((mainVolume * feePercentage * 365) / poolTVL) * 100;
+    const susdApr = ((susdVolume * feePercentage * 365) / susdPoolTVL) * 100;
 
     return NextResponse.json({
       mainPool: {
         apr: apr.toFixed(2),
-        volume24h: totalVolume,
+        volume24h: mainVolume,
         tvl: poolTVL,
         balances,
       },
       susdPool: {
         apr: susdApr.toFixed(2),
-        volume24h: susdTotalVolume,
+        volume24h: susdVolume,
         tvl: susdPoolTVL,
         balances: susdBalances,
       },
